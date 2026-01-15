@@ -1,0 +1,8 @@
+========================================
+      Auth Service - HireFlow JAVA PROJECT
+========================================
+   Author : Himanshu Singh
+   Spring : ${spring-boot.version}
+   Java   : ${java.version}
+========================================
+
