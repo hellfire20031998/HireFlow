@@ -8,7 +8,10 @@ import lombok.EqualsAndHashCode;
 @Entity
 @Data
 @Table(
-        name = "roles"
+        name = "roles",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "name")
+        }
 )
 public class Role extends BaseEntity {
 
