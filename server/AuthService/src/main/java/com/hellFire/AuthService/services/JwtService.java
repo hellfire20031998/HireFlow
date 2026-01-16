@@ -20,7 +20,7 @@ public class JwtService {
 
     public String generateToken(String username) {
 
-        return Jwts.builder()
+        return "Bearer " + Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))

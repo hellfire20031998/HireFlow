@@ -35,4 +35,13 @@ public class User extends BaseEntity {
 
     @Column(length = 20)
     private String phone;
+
+    @PrePersist
+    @PreUpdate
+    private void ensureLastName() {
+        if (this.lastName == null) {
+            this.lastName = "";
+        }
+    }
+
 }

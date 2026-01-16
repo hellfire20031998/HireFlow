@@ -2,6 +2,7 @@ package com.hellFire.AuthService.services;
 
 import com.hellFire.AuthService.dto.UserDto;
 import com.hellFire.AuthService.dto.requests.CreateUserRequest;
+import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.exceptions.InvalidCredentialsException;
 import com.hellFire.AuthService.exceptions.UserAlreadyExistsException;
 import com.hellFire.AuthService.exceptions.UserNotFoundException;
@@ -37,7 +38,7 @@ public class AuthService {
     }
 
     @Transactional
-    public String login(String username, String password) {
+    public UserResponse login(String username, String password) {
 
         User user = userRepository
                 .findByUsernameAndDeletedFalse(username)
@@ -55,11 +56,11 @@ public class AuthService {
 //            throw new RuntimeException("Email not verified");
 //        }
 
-        return jwtService.generateToken(user.getUsername());
+        return new UserResponse(jwtService.generateToken(username), userMapper.toDto(user));
     }
 
     @Transactional
-    public UserDto register(CreateUserRequest request) {
+    public UserResponse register(CreateUserRequest request) {
 
         boolean exists = userRepository
                 .existsByUsernameOrEmail(request.getUsername(), request.getEmail());
@@ -79,6 +80,8 @@ public class AuthService {
 //        // ✅ Create email verification token
 //        emailVerificationTokenService.createAndSend(user);
 
-        return userMapper.toDto(user);
+        return new UserResponse(jwtService.generateToken(user.getUsername()), userMapper.toDto(user));
+
+
     }
 }

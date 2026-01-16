@@ -2,6 +2,9 @@ package com.hellFire.AuthService.controllers;
 
 import com.hellFire.AuthService.dto.UserDto;
 import com.hellFire.AuthService.dto.requests.CreateUserRequest;
+import com.hellFire.AuthService.dto.requests.LoginRequest;
+import com.hellFire.AuthService.dto.responses.ApiResponse;
+import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,14 +19,19 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public String login(@RequestParam String username,
-                        @RequestParam String password) {
-
-        return authService.login(username, password);
+    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody LoginRequest loginRequest) {
+        UserResponse response = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        return ResponseEntity.ok(
+                ApiResponse.success(response, "Login successful")
+        );
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@RequestBody CreateUserRequest createUserRequest) {
-        return new ResponseEntity<>(authService.register(createUserRequest), HttpStatus.CREATED);
+    public ResponseEntity<ApiResponse<UserResponse>> register(@RequestBody CreateUserRequest createUserRequest) {
+        UserResponse response = authService.register(createUserRequest);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response, "User registered successfully"));
     }
+
 }
