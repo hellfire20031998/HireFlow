@@ -6,6 +6,8 @@ import com.hellFire.AuthService.dto.requests.LoginRequest;
 import com.hellFire.AuthService.dto.responses.ApiResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.services.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,9 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody LoginRequest loginRequest) {
-        UserResponse response = authService.login(loginRequest.getUsername(), loginRequest.getPassword());
+    public ResponseEntity<ApiResponse<UserResponse>> login(@RequestBody LoginRequest loginRequest,
+                                                           HttpServletRequest request) {
+        UserResponse response = authService.login(loginRequest.getUsername(), loginRequest.getPassword(), request);
         return ResponseEntity.ok(
                 ApiResponse.success(response, "Login successful")
         );
