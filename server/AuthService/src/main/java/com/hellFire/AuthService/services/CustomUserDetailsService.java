@@ -1,5 +1,6 @@
 package com.hellFire.AuthService.services;
 
+import com.hellFire.AuthService.exceptions.UserNotFoundException;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.respositories.IUserRepository;
 import com.hellFire.AuthService.utils.CustomUserDetails;
@@ -21,10 +22,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByUsernameAndDeleted(username, false);
-        if (user == null) {
-            throw new UsernameNotFoundException(username);
-        }
+        User user = userRepository
+                .findByUsernameAndDeletedFalse(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
 
         return new CustomUserDetails(user);
     }
