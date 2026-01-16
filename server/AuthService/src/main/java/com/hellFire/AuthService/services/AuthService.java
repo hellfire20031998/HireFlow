@@ -8,11 +8,15 @@ import com.hellFire.AuthService.exceptions.UserAlreadyExistsException;
 import com.hellFire.AuthService.exceptions.UserNotFoundException;
 import com.hellFire.AuthService.mapper.IUserMapper;
 import com.hellFire.AuthService.model.User;
+import com.hellFire.AuthService.model.UserRole;
 import com.hellFire.AuthService.respositories.IUserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
@@ -21,6 +25,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final IUserMapper userMapper;
+    private final UserRoleService userRoleService;
 //    private final UserVerificationService userVerificationService;
 //    private final EmailVerificationTokenService emailVerificationTokenService;
 
@@ -28,12 +33,14 @@ public class AuthService {
             IUserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            IUserMapper userMapper
+            IUserMapper userMapper,
+            UserRoleService userRoleService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.userMapper = userMapper;
+        this.userRoleService = userRoleService;
 
     }
 
@@ -56,7 +63,13 @@ public class AuthService {
 //            throw new RuntimeException("Email not verified");
 //        }
 
-        return new UserResponse(jwtService.generateToken(username), userMapper.toDto(user));
+        List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
+        List<String> roles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).toList();
+
+        return new UserResponse(jwtService.generateToken(user.getUsername(), userRoleList),
+                    userMapper.toDto(user),
+                        roles
+                    );
     }
 
     @Transactional
@@ -80,8 +93,13 @@ public class AuthService {
 //        // ✅ Create email verification token
 //        emailVerificationTokenService.createAndSend(user);
 
-        return new UserResponse(jwtService.generateToken(user.getUsername()), userMapper.toDto(user));
+        List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
+        List<String> roles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).toList();
 
+        return new UserResponse(jwtService.generateToken(user.getUsername(), userRoleList),
+                userMapper.toDto(user),
+                roles
+        );
 
     }
 }
