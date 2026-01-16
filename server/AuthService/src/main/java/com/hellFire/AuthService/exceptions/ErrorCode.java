@@ -34,6 +34,9 @@ public enum ErrorCode {
     // =========================
     BUSINESS_ERROR,
     OPERATION_NOT_ALLOWED,
+    ROLE_NOT_ASSIGNED,
+    ROLE_NOT_FOUND,
+    FORBIDDEN,
 
     // =========================
     // SYSTEM / DATABASE

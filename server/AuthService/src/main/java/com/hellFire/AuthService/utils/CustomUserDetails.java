@@ -1,23 +1,31 @@
 package com.hellFire.AuthService.utils;
 
 import com.hellFire.AuthService.model.User;
+import com.hellFire.AuthService.model.UserRole;
+import com.hellFire.AuthService.services.UserRoleService;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
+    @Getter
     private final User user;
+    private final List<UserRole> userRoles;
 
-    public CustomUserDetails(User user) {
+    public CustomUserDetails(User user, List<UserRole> userRoles) {
         this.user = user;
+        this.userRoles = userRoles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return userRoles.stream().map(userRole -> new SimpleGrantedAuthority(userRole.getRole().getName())).collect(Collectors.toList());
     }
 
     @Override
@@ -50,7 +58,4 @@ public class CustomUserDetails implements UserDetails {
         return user.isActive() && !user.isDeleted();
     }
 
-    public User getUser() {
-        return user;
-    }
 }
