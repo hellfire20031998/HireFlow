@@ -10,12 +10,14 @@ import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
 import com.hellFire.AuthService.model.enums.RoleScope;
 import com.hellFire.AuthService.respositories.IUserRepository;
+import com.hellFire.AuthService.utils.SecurityUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -55,6 +57,16 @@ public class UserService {
             }
         }
         userRoleService.assignRoleToUser(targetUser, roles);
+    }
+
+    public UserResponse userVerification(String token) {
+        User user = SecurityUtil.getCurrentUser();
+        List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
+        List<String> userRoles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).collect(Collectors.toList());
+        return new UserResponse(token,
+                userMapper.toDto(user),
+                userRoles
+                );
     }
 
 

@@ -1,13 +1,11 @@
 package com.hellFire.AuthService.controllers;
 
-import com.hellFire.AuthService.dto.UserDto;
 import com.hellFire.AuthService.dto.requests.CreateUserRequest;
 import com.hellFire.AuthService.dto.requests.LoginRequest;
 import com.hellFire.AuthService.dto.responses.ApiResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
