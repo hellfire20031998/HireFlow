@@ -1,6 +1,7 @@
 package com.hellFire.AuthService.controllers;
 
 import com.hellFire.AuthService.dto.responses.ApiResponse;
+import com.hellFire.AuthService.dto.responses.IdentityResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.services.UserService;
@@ -31,11 +32,6 @@ public class UserController {
         userService.assignRoleToUser(actingUser, userId, roleIds);
 
         return ResponseEntity.ok(ApiResponse.success(null, "Roles assigned successfully"));
-    }
-
-    @GetMapping("/validation")
-    public ResponseEntity<ApiResponse<UserResponse>> validation(@RequestHeader("Authorization") String authHeader){
-        return ResponseEntity.ok(ApiResponse.success(userService.userVerification(authHeader), "User validation successful"));
     }
 
 

@@ -2,6 +2,7 @@ package com.hellFire.AuthService.services;
 
 import com.hellFire.AuthService.dto.UserDto;
 import com.hellFire.AuthService.dto.requests.CreateUserRequest;
+import com.hellFire.AuthService.dto.responses.IdentityResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.exceptions.InvalidCredentialsException;
 import com.hellFire.AuthService.exceptions.UserAlreadyExistsException;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -105,6 +107,20 @@ public class AuthService {
                 userMapper.toDto(user),
                 roles
         );
+    }
 
+    public IdentityResponse userVerification(String token) {
+        jwtService.isTokenValid(token);
+        String username = jwtService.extractUsername(token);
+        Optional<User> userOptional = userRepository.findByUsernameAndDeletedFalse(username);
+        if(userOptional.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+        User user = userOptional.get();
+        List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
+        List<String> userRoles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).collect(Collectors.toList());
+        return new IdentityResponse(user.getId(),
+                user.getUsername(),
+                userRoles);
     }
 }

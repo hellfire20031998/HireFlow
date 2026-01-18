@@ -3,6 +3,7 @@ package com.hellFire.AuthService.controllers;
 import com.hellFire.AuthService.dto.requests.CreateUserRequest;
 import com.hellFire.AuthService.dto.requests.LoginRequest;
 import com.hellFire.AuthService.dto.responses.ApiResponse;
+import com.hellFire.AuthService.dto.responses.IdentityResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +34,14 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "User registered successfully"));
+    }
+
+    @GetMapping("/validation")
+    public ResponseEntity<ApiResponse<IdentityResponse>> validation(@RequestHeader("Authorization") String authHeader){
+        String token = authHeader.startsWith("Bearer ")
+                ? authHeader.substring(7)
+                : authHeader;
+        return ResponseEntity.ok(ApiResponse.success(authService.userVerification(token), "User validation successful"));
     }
 
 }
