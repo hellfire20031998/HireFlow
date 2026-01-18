@@ -1,5 +1,6 @@
 package com.hellFire.AuthService.services;
 
+import com.hellFire.AuthService.dto.responses.IdentityResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.exceptions.BusinessException;
 import com.hellFire.AuthService.exceptions.ErrorCode;
@@ -10,12 +11,15 @@ import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
 import com.hellFire.AuthService.model.enums.RoleScope;
 import com.hellFire.AuthService.respositories.IUserRepository;
+import com.hellFire.AuthService.utils.SecurityUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -23,13 +27,16 @@ public class UserService {
     private final IUserRepository userRepository;
     private final UserRoleService userRoleService;
     private final IUserMapper userMapper;
+    private final JwtService jwtService;
 
     public UserService(IUserRepository userRepository,
                        UserRoleService userRoleService,
-                       IUserMapper userMapper) {
+                       IUserMapper userMapper,
+                       JwtService jwtService) {
         this.userRepository = userRepository;
         this.userRoleService = userRoleService;
         this.userMapper = userMapper;
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -56,7 +63,6 @@ public class UserService {
         }
         userRoleService.assignRoleToUser(targetUser, roles);
     }
-
 
     private boolean isSystemAdmin(User user) {
         return userRoleService.getUserRoles(user.getId()).stream()

@@ -3,6 +3,7 @@ package com.hellFire.AuthService.controllers;
 import com.hellFire.AuthService.dto.responses.ApiResponse;
 import com.hellFire.AuthService.exceptions.BusinessException;
 import com.hellFire.AuthService.exceptions.UserAlreadyExistsException;
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.PersistenceException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +66,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error("AUTH_ERROR", "Authentication failed"));
+    }
+
+    @ExceptionHandler(io.jsonwebtoken.JwtException.class)
+    public ResponseEntity<ApiResponse<?>> handleJwtException(JwtException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(
+                        "Invalid or expired token",
+                        "AUTH_401"
+                ));
     }
 
     @ExceptionHandler(Exception.class)

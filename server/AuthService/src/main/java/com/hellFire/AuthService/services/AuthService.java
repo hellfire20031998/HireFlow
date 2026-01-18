@@ -2,6 +2,7 @@ package com.hellFire.AuthService.services;
 
 import com.hellFire.AuthService.dto.UserDto;
 import com.hellFire.AuthService.dto.requests.CreateUserRequest;
+import com.hellFire.AuthService.dto.responses.IdentityResponse;
 import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.exceptions.InvalidCredentialsException;
 import com.hellFire.AuthService.exceptions.UserAlreadyExistsException;
@@ -10,12 +11,14 @@ import com.hellFire.AuthService.mapper.IUserMapper;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
 import com.hellFire.AuthService.respositories.IUserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,50 +29,54 @@ public class AuthService {
     private final JwtService jwtService;
     private final IUserMapper userMapper;
     private final UserRoleService userRoleService;
-//    private final UserVerificationService userVerificationService;
-//    private final EmailVerificationTokenService emailVerificationTokenService;
+    private final LoginAuditService loginAuditService;
 
     public AuthService(
             IUserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             IUserMapper userMapper,
-            UserRoleService userRoleService
+            UserRoleService userRoleService,
+            LoginAuditService loginAuditService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.userMapper = userMapper;
         this.userRoleService = userRoleService;
+        this.loginAuditService = loginAuditService;
 
     }
 
     @Transactional
-    public UserResponse login(String username, String password) {
+    public UserResponse login(String username, String password, HttpServletRequest request) {
 
         User user = userRepository
                 .findByUsernameAndDeletedFalse(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
 
-        if (!user.isActive()) {
-            throw new RuntimeException("User account is disabled");
-        }
-
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException("Invalid credentials");
         }
 
-//        if (!userVerificationService.isEmailVerified(user)) {
-//            throw new RuntimeException("Email not verified");
-//        }
-
         List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
-        List<String> roles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).toList();
+        List<String> roles = userRoleList.stream()
+                .map(userRole -> userRole.getRole().getName())
+                .toList();
 
-        return new UserResponse(jwtService.generateToken(user.getUsername(), userRoleList),
-                    userMapper.toDto(user),
-                        roles
-                    );
+        loginAuditService.log(
+                user,
+                request.getRemoteAddr(),
+                request.getHeader("User-Agent"),
+                true,
+                "Login successful"
+        );
+
+        return new UserResponse(
+                jwtService.generateToken(user.getUsername(), userRoleList),
+                userMapper.toDto(user),
+                roles
+        );
     }
 
     @Transactional
@@ -100,6 +107,20 @@ public class AuthService {
                 userMapper.toDto(user),
                 roles
         );
+    }
 
+    public IdentityResponse userVerification(String token) {
+        jwtService.isTokenValid(token);
+        String username = jwtService.extractUsername(token);
+        Optional<User> userOptional = userRepository.findByUsernameAndDeletedFalse(username);
+        if(userOptional.isEmpty()){
+            throw new UserNotFoundException("User not found");
+        }
+        User user = userOptional.get();
+        List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
+        List<String> userRoles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).collect(Collectors.toList());
+        return new IdentityResponse(user.getId(),
+                user.getUsername(),
+                userRoles);
     }
 }
