@@ -37,6 +37,8 @@ public enum ErrorCode {
     ROLE_NOT_ASSIGNED,
     ROLE_NOT_FOUND,
     FORBIDDEN,
+    TOKEN_NOT_FOUND,
+    TOKEN_ALREADY_USED,
 
     // =========================
     // SYSTEM / DATABASE

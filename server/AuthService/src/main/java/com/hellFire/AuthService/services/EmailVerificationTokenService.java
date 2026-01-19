@@ -1,5 +1,7 @@
 package com.hellFire.AuthService.services;
 
+import com.hellFire.AuthService.exceptions.BusinessException;
+import com.hellFire.AuthService.exceptions.ErrorCode;
 import com.hellFire.AuthService.model.EmailVerificationToken;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.respositories.IEmailVerificationTokenRepository;
@@ -28,12 +30,13 @@ public class EmailVerificationTokenService {
         }
 
         if (token.getExpiresAt().isBefore(Instant.now())) {
+            token.setDeleted(true);
+            emailVerificationTokenRepository.save(token);
             return createToken(user);
         }
 
         return token;
     }
-
 
     public EmailVerificationToken createToken(User user) {
         EmailVerificationToken emailVerificationToken = emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(user.getId(), false, false);
@@ -47,25 +50,43 @@ public class EmailVerificationTokenService {
         return emailVerificationToken;
     }
 
-    public boolean verifyToken(User user, String token) {
+    public void verifyToken(User user, String token) {
+
         EmailVerificationToken emailVerificationToken =
-                emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(user.getId(), false, false);
+                emailVerificationTokenRepository
+                        .findByUser_IdAndUsedAndDeleted(user.getId(), false, false);
 
         if (emailVerificationToken == null) {
-            return false;
+            throw new BusinessException(
+                    ErrorCode.TOKEN_NOT_FOUND,
+                    "No active email verification token found"
+            );
         }
 
+//        if (!isValidTokenFormat(token)) {
+//            throw new BusinessException(
+//                    ErrorCode.TOKEN_INVALID,
+//                    "Invalid token format"
+//            );
+//        }
+
         if (!emailVerificationToken.getToken().equals(token)) {
-            return false;
+            throw new BusinessException(
+                    ErrorCode.TOKEN_INVALID,
+                    "Token does not match"
+            );
         }
 
         if (emailVerificationToken.getExpiresAt().isBefore(Instant.now())) {
-            return false;
+            throw new BusinessException(
+                    ErrorCode.TOKEN_EXPIRED,
+                    "Token has expired"
+            );
         }
+
         emailVerificationToken.setUsed(true);
         emailVerificationTokenRepository.save(emailVerificationToken);
-
-        return true;
     }
+
 
 }
