@@ -48,8 +48,8 @@ public class UserRoleService {
 
         List<UserRole> userRoles = roles.stream()
                 .filter(role ->
-                        !userRoleRepository.existsByUser_IdAndRole_IdAndActive(
-                                user.getId(), role.getId(), true
+                        !userRoleRepository.existsByUser_IdAndRole_IdAndDeleted(
+                                user.getId(), role.getId(), false
                         )
                 )
                 .map(role -> {
@@ -66,12 +66,11 @@ public class UserRoleService {
     }
 
     public List<UserRole> getUserRoles(Long userId) {
-        List<UserRole> roles = userRoleRepository.findAllByUser_IdAndActive(userId, true);
+        List<UserRole> roles = userRoleRepository.findAllByUser_IdAndDeleted(userId, false);
 
         if (roles.isEmpty()) {
             return new ArrayList<>();
         }
-
         return roles;
     }
 }

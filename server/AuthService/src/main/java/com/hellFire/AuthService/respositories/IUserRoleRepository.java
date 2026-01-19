@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface IUserRoleRepository extends JpaRepository<UserRole, Long> {
-    List<UserRole> findAllByUser_IdAndActive(Long userId, boolean active);
+    List<UserRole> findAllByUser_IdAndDeleted(Long userId, boolean deleted);
 
-    boolean existsByUser_IdAndRole_IdAndActive(Long userId, Long roleId, boolean active);
+    boolean existsByUser_IdAndRole_IdAndDeleted(Long userId, Long roleId, boolean deleted);
 }

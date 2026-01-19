@@ -2,7 +2,7 @@ package com.hellFire.AuthService.utils;
 
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
-import com.hellFire.AuthService.services.UserRoleService;
+import com.hellFire.AuthService.model.enums.Status;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -45,7 +45,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.isActive() && !user.isDeleted();
+        return user.getStatus().equals(Status.ACTIVE) && !user.isDeleted();
     }
 
     @Override
@@ -55,7 +55,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isActive() && !user.isDeleted();
+        return user.getStatus().equals(Status.ACTIVE) && !user.isDeleted();
     }
 
 }
