@@ -26,8 +26,5 @@ public abstract class BaseEntity {
     private Instant updatedAt;
 
     @Column(nullable = false)
-    private boolean active = true;
-
-    @Column(nullable = false)
     private boolean deleted = false;
 }

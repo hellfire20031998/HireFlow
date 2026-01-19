@@ -1,4 +1,6 @@
 package com.hellFire.AuthService.model.enums;
 
 public enum Status {
+    ACTIVE,
+    INACTIVE,
 }

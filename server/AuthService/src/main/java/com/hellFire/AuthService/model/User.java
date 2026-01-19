@@ -1,6 +1,7 @@
 package com.hellFire.AuthService.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hellFire.AuthService.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,6 +37,10 @@ public class User extends BaseEntity {
     @Column(length = 20)
     private String phone;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
     @PrePersist
     @PreUpdate
     private void ensureLastName() {
@@ -43,5 +48,4 @@ public class User extends BaseEntity {
             this.lastName = "";
         }
     }
-
 }
