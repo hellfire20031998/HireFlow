@@ -5,5 +5,7 @@ import lombok.Getter;
 @Getter
 public enum RoleScope {
     SYSTEM,
-    CLIENT
+    CLIENT,
+    INTERVIEWER,
+    CANDIDATE,
 }

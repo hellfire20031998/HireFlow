@@ -28,12 +28,32 @@ public class AuthController {
         );
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponse>> register(@RequestBody CreateUserRequest createUserRequest) {
-        UserResponse response = authService.register(createUserRequest);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "User registered successfully"));
+    @PostMapping("/register/system")
+    public ResponseEntity<ApiResponse<UserResponse>> registerSystem(@RequestBody CreateUserRequest request) {
+        UserResponse response = authService.registerSystemUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response, "System user registered successfully"));
+    }
+
+    @PostMapping("/register/client")
+    public ResponseEntity<ApiResponse<UserResponse>> registerClient(@RequestBody CreateUserRequest request) {
+        UserResponse response = authService.registerClientUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response, "Client user registered successfully"));
+    }
+
+    @PostMapping("/register/interviewer")
+    public ResponseEntity<ApiResponse<UserResponse>> registerInterviewer(@RequestBody CreateUserRequest request) {
+        UserResponse response = authService.registerInterviewer(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response, "Interviewer registered successfully"));
+    }
+
+    @PostMapping("/register/candidate")
+    public ResponseEntity<ApiResponse<UserResponse>> registerCandidate(@RequestBody CreateUserRequest request) {
+        UserResponse response = authService.registerCandidate(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(response, "Candidate registered successfully"));
     }
 
     @GetMapping("/validation")

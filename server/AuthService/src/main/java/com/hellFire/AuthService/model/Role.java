@@ -22,5 +22,4 @@ public class Role extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private RoleScope scope;
-
 }

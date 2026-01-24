@@ -5,6 +5,7 @@ import com.hellFire.AuthService.dto.responses.EmailVerificationRequest;
 import com.hellFire.AuthService.model.EmailVerificationToken;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.utils.SecurityUtil;
+import com.hellFire.AuthService.utils.UrlUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class EmailVerificationService {
         HttpEntity<EmailVerificationRequest> entity =
                 new HttpEntity<>(request, headers);
 
-        String url = "http://localhost:8081/email/verify";
+        String url = UrlUtils.EmailVerifyUrl;
 
         ResponseEntity<ApiResponse> response =
                 restTemplate.postForEntity(url, entity, ApiResponse.class);
@@ -62,7 +63,7 @@ public class EmailVerificationService {
 
     private void sendWelcomeMail(String email, String username) {
 
-        String url = "http://localhost:8081/email/welcome";
+        String url = UrlUtils.EmailWelcomeUrl;
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("to", email);

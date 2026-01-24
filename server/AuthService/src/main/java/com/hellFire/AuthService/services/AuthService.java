@@ -7,6 +7,7 @@ import com.hellFire.AuthService.dto.responses.UserResponse;
 import com.hellFire.AuthService.exceptions.InvalidCredentialsException;
 import com.hellFire.AuthService.exceptions.UserAlreadyExistsException;
 import com.hellFire.AuthService.exceptions.UserNotFoundException;
+import com.hellFire.AuthService.mapper.ITenantMapper;
 import com.hellFire.AuthService.mapper.IUserMapper;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
@@ -28,24 +29,28 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final IUserMapper userMapper;
+    private final ITenantMapper tenantMapper;
     private final UserRoleService userRoleService;
     private final LoginAuditService loginAuditService;
+    private final TenantService tenantService;
 
     public AuthService(
             IUserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            IUserMapper userMapper,
+            IUserMapper userMapper, ITenantMapper tenantMapper,
             UserRoleService userRoleService,
-            LoginAuditService loginAuditService
+            LoginAuditService loginAuditService, TenantService tenantService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.userMapper = userMapper;
+        this.tenantMapper = tenantMapper;
         this.userRoleService = userRoleService;
         this.loginAuditService = loginAuditService;
 
+        this.tenantService = tenantService;
     }
 
     @Transactional
@@ -73,14 +78,45 @@ public class AuthService {
         );
 
         return new UserResponse(
-                jwtService.generateToken(user.getUsername(), userRoleList),
+                jwtService.generateToken(user, userRoleList),
                 userMapper.toDto(user),
                 roles
         );
     }
 
     @Transactional
-    public UserResponse register(CreateUserRequest request) {
+    public UserResponse registerSystemUser(CreateUserRequest request) {
+        User user = createBaseUser(request);
+        user.setTenant(null);
+        userRepository.save(user);
+        return buildUserResponse(user);
+    }
+
+    @Transactional
+    public UserResponse registerClientUser(CreateUserRequest request) {
+        User user = createBaseUser(request);
+
+        userRepository.save(user);
+        return buildUserResponse(user);
+    }
+
+    @Transactional
+    public UserResponse registerInterviewer(CreateUserRequest request) {
+        User user = createBaseUser(request);
+        userRepository.save(user);
+        return buildUserResponse(user);
+    }
+
+    @Transactional
+    public UserResponse registerCandidate(CreateUserRequest request) {
+        User user = createBaseUser(request);
+
+        user.setTenant(null);
+        userRepository.save(user);
+        return buildUserResponse(user);
+    }
+
+    private User createBaseUser(CreateUserRequest request) {
 
         boolean exists = userRepository
                 .existsByUsernameOrEmail(request.getUsername(), request.getEmail());
@@ -91,24 +127,19 @@ public class AuthService {
 
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        user = userRepository.save(user);
-
-//        // ✅ Create verification row
-//        userVerificationService.createForUser(user);
-//
-//        // ✅ Create email verification token
-//        emailVerificationTokenService.createAndSend(user);
-
-        List<UserRole> userRoleList = userRoleService.getUserRoles(user.getId());
-        List<String> roles = userRoleList.stream().map(userRole -> userRole.getRole().getName()).toList();
-
-        return new UserResponse(jwtService.generateToken(user.getUsername(), userRoleList),
-                userMapper.toDto(user),
-                roles
-        );
+        return user;
     }
 
+    private UserResponse buildUserResponse(User user) {
+        List<UserRole> roles = userRoleService.getUserRoles(user.getId());
+        List<String> roleNames = roles.stream().map(r -> r.getRole().getName()).toList();
+
+        return new UserResponse(
+                jwtService.generateToken(user, roles),
+                userMapper.toDto(user),
+                roleNames
+        );
+    }
     public IdentityResponse userVerification(String token) {
         jwtService.isTokenValid(token);
         String username = jwtService.extractUsername(token);

@@ -1,5 +1,6 @@
 package com.hellFire.AuthService.services;
 
+import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -23,14 +24,16 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username, List<UserRole> userRoles) {
+    public String generateToken(User user, List<UserRole> userRoles) {
 
+        String username = user.getUsername();
         List<String> roles = userRoles.stream()
                 .map(userRole -> userRole.getRole().getName())
                 .toList();
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
+        claims.put("tenant_Id", user.getTenant().getId());
 
         return "Bearer " + Jwts.builder()
                 .setSubject(username)
