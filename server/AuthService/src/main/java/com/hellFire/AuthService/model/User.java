@@ -41,6 +41,10 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Status status = Status.ACTIVE;
 
+    @ManyToOne
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
+
     @PrePersist
     @PreUpdate
     private void ensureLastName() {

@@ -1,4 +1,9 @@
 package com.hellFire.AuthService.respositories;
 
-public interface ITenantRepository {
+import com.hellFire.AuthService.model.Tenant;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ITenantRepository extends JpaRepository<Tenant, Long> {
 }
