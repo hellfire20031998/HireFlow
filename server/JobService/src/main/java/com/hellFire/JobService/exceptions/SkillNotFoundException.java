@@ -1,7 +1,7 @@
 package com.hellFire.JobService.exceptions;
 
 public class SkillNotFoundException extends BusinessException{
-    public SkillNotFoundException(ErrorCode errorCode, String message) {
-        super(errorCode, message);
+    public SkillNotFoundException( String message) {
+        super(ErrorCode.SKILL_NOT_FOUND, message);
     }
 }
