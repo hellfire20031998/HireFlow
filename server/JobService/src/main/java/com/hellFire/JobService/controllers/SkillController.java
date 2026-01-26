@@ -5,7 +5,6 @@ import com.hellFire.JobService.dtos.requests.CreateSkillRequest;
 import com.hellFire.JobService.dtos.responses.ApiResponse;
 import com.hellFire.JobService.services.SkillService;
 import jakarta.validation.Valid;
-import org.apache.kafka.shaded.com.google.protobuf.Api;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
