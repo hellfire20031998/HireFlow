@@ -1,10 +1,10 @@
 package com.hellFire.AuthService.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.hellFire.AuthService.model.enums.Status;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import tools.jackson.databind.PropertyNamingStrategies;
-import tools.jackson.databind.annotation.JsonNaming;
 
 @EqualsAndHashCode(callSuper = true)
 @Data

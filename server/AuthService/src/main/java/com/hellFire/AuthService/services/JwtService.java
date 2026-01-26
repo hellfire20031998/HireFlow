@@ -33,6 +33,7 @@ public class JwtService {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
+        claims.put("user_Id", user.getId());
         claims.put("tenant_Id", user.getTenant().getId());
 
         return "Bearer " + Jwts.builder()
