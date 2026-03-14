@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
@@ -34,7 +33,9 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles);
         claims.put("user_Id", user.getId());
-        claims.put("tenant_Id", user.getTenant().getId());
+        if (user.getTenant() != null) {
+            claims.put("tenant_Id", user.getTenant().getId());
+        }
 
         return "Bearer " + Jwts.builder()
                 .setSubject(username)

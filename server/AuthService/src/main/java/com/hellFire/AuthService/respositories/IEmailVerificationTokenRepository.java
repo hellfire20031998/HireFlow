@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IEmailVerificationTokenRepository extends JpaRepository<EmailVerificationToken, Long> {
     EmailVerificationToken findByUser_IdAndUsedAndDeleted(Long userId, boolean used, boolean deleted);
+
+    void deleteAllByUser_Id(Long userId);
 }
