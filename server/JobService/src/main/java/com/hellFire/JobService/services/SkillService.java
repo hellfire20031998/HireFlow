@@ -1,6 +1,8 @@
 package com.hellFire.JobService.services;
 
+import com.hellFire.JobService.dtos.SkillDto;
 import com.hellFire.JobService.dtos.requests.CreateSkillRequest;
+import com.hellFire.JobService.dtos.responses.ApiResponse;
 import com.hellFire.JobService.exceptions.ErrorCode;
 import com.hellFire.JobService.exceptions.SkillNotFoundException;
 import com.hellFire.JobService.mappers.ISkillMapper;
@@ -21,17 +23,29 @@ public class SkillService {
         this.skillMapper = skillMapper;
     }
 
-    public Skill createSkill(CreateSkillRequest request) {
-        Skill skill = skillMapper.toEntity(request);
+    public SkillDto createSkill(CreateSkillRequest request) {
+        Skill skill = toEntity(request);
         skill = skillRepository.save(skill);
-        return skill;
+        return toDto(skill);
     }
 
-    public List<Skill> getAllSkills(List<Long> skillIds) {
-        return skillRepository.findAllById(skillIds);
+    public List<SkillDto> getAllSkills() {
+        return toDtoList(skillRepository.findAll());
     }
 
     public Skill getSkillById(Long skillId) {
-        return skillRepository.findById(skillId).orElseThrow(()-> new SkillNotFoundException(ErrorCode.SKILL_NOT_FOUND, "Skill not found for id: " + skillId));
+        return skillRepository.findById(skillId).orElseThrow(()-> new SkillNotFoundException("Skill not found for id: " + skillId));
+    }
+
+    public SkillDto toDto(Skill skill) {
+        return skillMapper.toDto(skill);
+    }
+
+    public List<SkillDto> toDtoList(List<Skill> skills) {
+        return skillMapper.toDtoList(skills);
+    }
+
+    public Skill toEntity(CreateSkillRequest request) {
+       return skillMapper.toEntity(request);
     }
 }

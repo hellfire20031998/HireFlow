@@ -52,12 +52,14 @@ public class Job extends BaseEntity {
 
     private Integer openings;
 
-    private LocalDate deadline;
+    private Long deadlineTime;
 
     @Enumerated(EnumType.STRING)
     private JobStatus status;
 
     private Long createdBy;
+
+    private String createdByName;
 
     private Long tenantId;
 }

@@ -1,5 +1,6 @@
 package com.hellFire.AuthService.services;
 
+import com.hellFire.AuthService.dto.TenantDto;
 import com.hellFire.AuthService.dto.requests.CreateTenantRequest;
 import com.hellFire.AuthService.mapper.ITenantMapper;
 import com.hellFire.AuthService.model.Tenant;
@@ -17,9 +18,20 @@ public class TenantService {
         this.tenantMapper = tenantMapper;
     }
 
-    public Tenant createTenant(CreateTenantRequest tenantRequest) {
+    public TenantDto createTenant(CreateTenantRequest tenantRequest) {
         Tenant tenant = tenantMapper.toEntity(tenantRequest);
         tenant = tenantRepository.save(tenant);
-        return tenant;
+        return tenantMapper.toDto(tenant);
+    }
+
+    public TenantDto updateTenant(Long id, CreateTenantRequest tenantRequest) {
+        Tenant tenant = tenantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tenant not found with id: " + id));
+
+        tenantMapper.updateTenantFromRequest(tenant, tenantRequest);
+
+        tenant = tenantRepository.save(tenant);
+        return tenantMapper.toDto(tenant);
     }
 }
+

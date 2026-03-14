@@ -7,6 +7,8 @@ import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.respositories.IEmailVerificationTokenRepository;
 import com.hellFire.AuthService.utils.Utils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -19,7 +21,9 @@ public class EmailVerificationTokenService {
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
     }
 
+    @Transactional
     public EmailVerificationToken getToken(User user) {
+
         EmailVerificationToken token =
                 emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(
                         user.getId(), false, false
@@ -28,27 +32,33 @@ public class EmailVerificationTokenService {
         if (token == null) {
             return createToken(user);
         }
+        if (token.getExpiresAt().isBefore(Instant.now())) {
+            emailVerificationTokenRepository.delete(token);
+            return createToken(user);
+        }
+        return token;
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public EmailVerificationToken createToken(User user) {
+
+        EmailVerificationToken token =
+                emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(
+                        user.getId(), false, false
+                );
+
+        if (token == null) {
+            return generateNewToken(user);
+        }
 
         if (token.getExpiresAt().isBefore(Instant.now())) {
-            token.setDeleted(true);
-            emailVerificationTokenRepository.save(token);
-            return createToken(user);
+            emailVerificationTokenRepository.delete(token);
+            return generateNewToken(user);
         }
 
         return token;
     }
 
-    public EmailVerificationToken createToken(User user) {
-        EmailVerificationToken emailVerificationToken = emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(user.getId(), false, false);
-        if (emailVerificationToken == null || emailVerificationToken.getExpiresAt().isBefore(Instant.now())) {
-            emailVerificationToken = new EmailVerificationToken();
-            emailVerificationToken.setUser(user);
-            emailVerificationToken.setToken(Utils.generateOtp());
-            emailVerificationToken.setExpiresAt(Instant.now().plusSeconds(60));
-            emailVerificationToken = emailVerificationTokenRepository.save(emailVerificationToken);
-        }
-        return emailVerificationToken;
-    }
 
     public void verifyToken(User user, String token) {
 
@@ -86,6 +96,18 @@ public class EmailVerificationTokenService {
 
         emailVerificationToken.setUsed(true);
         emailVerificationTokenRepository.save(emailVerificationToken);
+    }
+
+    private EmailVerificationToken generateNewToken(User user) {
+
+        emailVerificationTokenRepository.deleteAllByUser_Id(user.getId());
+
+        EmailVerificationToken token = new EmailVerificationToken();
+        token.setUser(user);
+        token.setToken(Utils.generateOtp());
+        token.setExpiresAt(Instant.now().plusSeconds(600));
+
+        return emailVerificationTokenRepository.save(token);
     }
 
 

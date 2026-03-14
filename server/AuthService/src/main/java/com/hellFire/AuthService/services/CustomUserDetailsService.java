@@ -4,7 +4,6 @@ import com.hellFire.AuthService.exceptions.UserNotFoundException;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
 import com.hellFire.AuthService.respositories.IUserRepository;
-import com.hellFire.AuthService.respositories.IUserRoleRepository;
 import com.hellFire.AuthService.utils.CustomUserDetails;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

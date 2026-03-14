@@ -24,8 +24,9 @@ public class JobDto extends BaseEntityDto {
     private Integer minSalary;
     private Integer maxSalary;
     private Integer openings;
-    private LocalDate deadline;
+    private Long deadlineTime;
     private JobStatus status;
     private Long createdBy;
+    private String createdByName;
     private Long tenantId;
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @Builder
@@ -38,6 +39,13 @@ public class ApiResponse<T> {
                 .success(false)
                 .errorCode(errorCode)
                 .message(message)
+                .build();
+    }
+    public static ApiResponse<?> error(String errorCode, Map<String, String> errors) {
+        return ApiResponse.builder()
+                .success(false)
+                .errorCode(errorCode)
+                .data(errors)
                 .build();
     }
 

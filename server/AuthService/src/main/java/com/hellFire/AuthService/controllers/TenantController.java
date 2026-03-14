@@ -1,0 +1,41 @@
+package com.hellFire.AuthService.controllers;
+
+import com.hellFire.AuthService.dto.TenantDto;
+import com.hellFire.AuthService.dto.requests.CreateTenantRequest;
+import com.hellFire.AuthService.dto.responses.ApiResponse;
+import com.hellFire.AuthService.model.User;
+import com.hellFire.AuthService.services.TenantService;
+import com.hellFire.AuthService.utils.SecurityUtil;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/auth/tenants")
+public class TenantController {
+
+    private final TenantService tenantService;
+
+    public TenantController(TenantService tenantService) {
+        this.tenantService = tenantService;
+    }
+
+    @PostMapping
+    public ResponseEntity<ApiResponse<TenantDto>> createTenant(@RequestBody CreateTenantRequest request, Authentication authentication) {
+        User user = SecurityUtil.getCurrentUser();
+        TenantDto tenant = tenantService.createTenant(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(tenant, "Tenant created successfully"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<TenantDto>> updateTenant(
+            @PathVariable Long id,
+            @RequestBody CreateTenantRequest request
+    ) {
+        TenantDto tenant = tenantService.updateTenant(id, request);
+        return ResponseEntity.ok(ApiResponse.success(tenant, "Tenant updated successfully"));
+    }
+}
+

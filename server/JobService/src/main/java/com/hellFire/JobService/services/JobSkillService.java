@@ -1,7 +1,6 @@
 package com.hellFire.JobService.services;
 
 import com.hellFire.JobService.dtos.requests.CreateJobSkillRequest;
-import com.hellFire.JobService.dtos.requests.SelectedSkillsRequest;
 import com.hellFire.JobService.models.Job;
 import com.hellFire.JobService.models.JobSkill;
 import com.hellFire.JobService.models.Skill;
@@ -10,25 +9,30 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class JobSkillService {
 
     private final IJobSkillRepository jobSkillRepository;
-    private final JobService jobService;
     private final SkillService skillService;
 
-    public JobSkillService(IJobSkillRepository jobSkillRepository, JobService jobService, SkillService skillService) {
+    public JobSkillService(IJobSkillRepository jobSkillRepository, SkillService skillService) {
         this.jobSkillRepository = jobSkillRepository;
-        this.jobService = jobService;
         this.skillService = skillService;
     }
 
-    @Transactional
-    public void createJobSkill(CreateJobSkillRequest request) {
+    public List<Skill> getAllSkillByJobId(Long jobId) {
+        List<JobSkill> jobSkillList = jobSkillRepository.findByJob_IdAndDeleted(jobId, false);
+        return jobSkillList.stream().map(JobSkill::getSkill).collect(Collectors.toList());
+    }
 
-        Job job = jobService.getJob(request.getJobId());
+    @Transactional
+    public List<Skill> createJobSkill(Job job, CreateJobSkillRequest request) {
+
         List<JobSkill> jobSkillList = new ArrayList<>();
 
         for (CreateJobSkillRequest.JobSkillItem item : request.getSkills()) {
@@ -45,7 +49,23 @@ public class JobSkillService {
             jobSkillList.add(jobSkill);
         }
 
-        jobSkillRepository.saveAll(jobSkillList);
+        jobSkillList = jobSkillRepository.saveAll(jobSkillList);
+
+        return jobSkillList.stream().map(JobSkill::getSkill).toList();
     }
+
+    public Map<Long, List<Skill>> getSkillsForJobIds(List<Long> jobIds) {
+        List<JobSkill> jobSkills = jobSkillRepository.findByJobIdIn(jobIds);
+
+        Map<Long, List<Skill>> map = new HashMap<>();
+
+        for (JobSkill js : jobSkills) {
+            map.computeIfAbsent(js.getJob().getId(), k -> new ArrayList<>())
+                    .add(js.getSkill());
+        }
+
+        return map;
+    }
+
 
 }

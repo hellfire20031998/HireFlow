@@ -4,6 +4,7 @@ import com.hellFire.AuthService.dto.TenantDto;
 import com.hellFire.AuthService.dto.requests.CreateTenantRequest;
 import com.hellFire.AuthService.model.Tenant;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring",
@@ -13,4 +14,6 @@ public interface ITenantMapper {
 
     Tenant toTenant(TenantDto dto);
     Tenant toEntity(CreateTenantRequest request);
+
+    void updateTenantFromRequest(@MappingTarget Tenant tenant, CreateTenantRequest request);
 }
