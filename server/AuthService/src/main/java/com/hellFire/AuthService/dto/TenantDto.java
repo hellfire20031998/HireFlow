@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -18,7 +19,7 @@ public class TenantDto extends BaseEntityDto {
     private String tenantName;
     private String tenantSlug;
     private String domain;
-    private String industry;
+    private List<IndustryDto> industries;
     private CompanySize companySize;
     private String country;
     private String countryCode;

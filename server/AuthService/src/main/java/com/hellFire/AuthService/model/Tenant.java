@@ -11,6 +11,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -34,8 +36,13 @@ public class Tenant extends BaseEntity {
     @Column(name = "domain", length = 150)
     private String domain;
 
-    @Column(name = "industry", length = 100)
-    private String industry;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "tenant_industries",
+            joinColumns = @JoinColumn(name = "tenant_id"),
+            inverseJoinColumns = @JoinColumn(name = "industry_id")
+    )
+    private List<Industry> industries = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "company_size", length = 50)

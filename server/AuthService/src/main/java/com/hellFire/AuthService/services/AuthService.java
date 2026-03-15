@@ -11,6 +11,7 @@ import com.hellFire.AuthService.mapper.ITenantMapper;
 import com.hellFire.AuthService.mapper.IUserMapper;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.model.UserRole;
+import com.hellFire.AuthService.model.enums.UserType;
 import com.hellFire.AuthService.respositories.IUserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -88,6 +89,7 @@ public class AuthService {
     public UserResponse registerSystemUser(CreateUserRequest request) {
         User user = createBaseUser(request);
         user.setTenant(null);
+        user.setUserType(UserType.INTERVIEWER);
         userRepository.save(user);
         return buildUserResponse(user);
     }
@@ -95,7 +97,7 @@ public class AuthService {
     @Transactional
     public UserResponse registerClientUser(CreateUserRequest request) {
         User user = createBaseUser(request);
-
+        user.setUserType(UserType.CLIENT);
         userRepository.save(user);
         return buildUserResponse(user);
     }
@@ -103,6 +105,7 @@ public class AuthService {
     @Transactional
     public UserResponse registerInterviewer(CreateUserRequest request) {
         User user = createBaseUser(request);
+        user.setUserType(UserType.INTERVIEWER);
         userRepository.save(user);
         return buildUserResponse(user);
     }
@@ -110,7 +113,7 @@ public class AuthService {
     @Transactional
     public UserResponse registerCandidate(CreateUserRequest request) {
         User user = createBaseUser(request);
-
+        user.setUserType(UserType.CANDIDATE);
         user.setTenant(null);
         userRepository.save(user);
         return buildUserResponse(user);

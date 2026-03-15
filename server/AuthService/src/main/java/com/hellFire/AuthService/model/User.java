@@ -2,6 +2,7 @@ package com.hellFire.AuthService.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hellFire.AuthService.model.enums.Status;
+import com.hellFire.AuthService.model.enums.UserType;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,6 +45,9 @@ public class User extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "tenant_id")
     private Tenant tenant;
+
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
     @PrePersist
     @PreUpdate
