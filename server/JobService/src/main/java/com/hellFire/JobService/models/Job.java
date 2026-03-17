@@ -4,7 +4,9 @@ import com.hellFire.JobService.models.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "jobs")
@@ -41,8 +43,12 @@ public class Job extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SeniorityLevel seniorityLevel;
 
+    @ElementCollection(fetch = FetchType.LAZY, targetClass = Industry.class)
+    @CollectionTable(name = "job_industries", joinColumns = @JoinColumn(name = "job_id"))
     @Enumerated(EnumType.STRING)
-    private Industry industry;
+    @Column(name = "industry")
+    @Builder.Default
+    private Set<Industry> industries = new HashSet<>();
 
     private Integer minExperience;
     private Integer maxExperience;
@@ -50,9 +56,15 @@ public class Job extends BaseEntity {
     private Integer minSalary;
     private Integer maxSalary;
 
+    @Enumerated(EnumType.STRING)
+    private SalaryCurrency salaryCurrency;
+
+    @Enumerated(EnumType.STRING)
+    private SalaryType salaryType;
+
     private Integer openings;
 
-    private Long deadlineTime;
+    private Instant deadlineTime;
 
     @Enumerated(EnumType.STRING)
     private JobStatus status;
@@ -62,4 +74,7 @@ public class Job extends BaseEntity {
     private String createdByName;
 
     private Long tenantId;
+
+    private Long lastUpdatedBy;
+    private String lastUpdatedByName;
 }

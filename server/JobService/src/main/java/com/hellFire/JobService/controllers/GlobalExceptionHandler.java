@@ -1,6 +1,7 @@
 package com.hellFire.JobService.controllers;
 
 import com.hellFire.JobService.dtos.responses.ApiResponse;
+import com.hellFire.JobService.exceptions.AccessDeniedException;
 import com.hellFire.JobService.exceptions.BusinessException;
 import com.hellFire.JobService.exceptions.JobNotFoundException;
 import com.hellFire.JobService.exceptions.SkillNotFoundException;
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getErrorCode().name(), ex.getMessage()));
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<?>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getErrorCode().name(), ex.getMessage()));
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<?>> handleValidationException(

@@ -5,6 +5,7 @@ import com.hellFire.AuthService.utils.JwtAuthenticationFilter;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -34,7 +35,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // login, register, verify email
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/register/system", "/auth/register/client", "/auth/register/interviewer", "/auth/register/candidate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/industries", "/auth/industries/search").permitAll()
+                        .requestMatchers("/auth/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 // 🔥 Register JWT filter BEFORE UsernamePasswordAuthFilter

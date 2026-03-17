@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface IJobRepository extends JpaRepository<Job, Long> {
     List<Job> findByDeleted(boolean deleted);
+    List<Job> findByCreatedByAndDeleted(Long createdBy, boolean deleted);
+    List<Job> findByTenantIdAndDeleted(Long tenantId, boolean deleted);
 }

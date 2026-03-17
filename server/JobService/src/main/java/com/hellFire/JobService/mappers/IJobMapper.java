@@ -2,17 +2,23 @@ package com.hellFire.JobService.mappers;
 
 import com.hellFire.JobService.dtos.JobDto;
 import com.hellFire.JobService.dtos.requests.CreateJobRequest;
+import com.hellFire.JobService.dtos.requests.UpdateJobRequest;
 import com.hellFire.JobService.models.Job;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring",
-nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface IJobMapper {
 
     JobDto toDto(Job job);
+
     Job toEntity(CreateJobRequest request);
+
+    void updateEntityFromRequest(UpdateJobRequest request, @MappingTarget Job job);
+
     List<JobDto> toDtoList(List<Job> jobs);
 }

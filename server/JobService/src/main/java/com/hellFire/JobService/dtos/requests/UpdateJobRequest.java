@@ -1,15 +1,13 @@
-package com.hellFire.JobService.dtos;
+package com.hellFire.JobService.dtos.requests;
 
 import com.hellFire.JobService.models.enums.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 import java.util.Set;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class JobDto extends BaseEntityDto {
+public class UpdateJobRequest {
     private String title;
     private String description;
     private String aboutRole;
@@ -29,9 +27,4 @@ public class JobDto extends BaseEntityDto {
     private Integer openings;
     private Instant deadlineTime;
     private JobStatus status;
-    private Long createdBy;
-    private String createdByName;
-    private Long tenantId;
-    private Long lastUpdatedBy;
-    private String lastUpdatedByName;
 }

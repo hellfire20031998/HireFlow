@@ -36,6 +36,9 @@ public class JwtService {
         if (user.getTenant() != null) {
             claims.put("tenant_Id", user.getTenant().getId());
         }
+        if (user.getUserType() != null) {
+            claims.put("user_Type", user.getUserType().name());
+        }
 
         return "Bearer " + Jwts.builder()
                 .setSubject(username)

@@ -1,6 +1,8 @@
 package com.hellFire.JobService.security;
 
+import com.hellFire.JobService.models.enums.UserType;
 import lombok.Data;
+
 import java.util.List;
 
 @Data
@@ -9,4 +11,6 @@ public class UserContext {
     private String username;
     private List<String> roles;
     private Long tenantId;
+    /** User type from AuthService, set from X-User-Type header. */
+    private UserType userType;
 }

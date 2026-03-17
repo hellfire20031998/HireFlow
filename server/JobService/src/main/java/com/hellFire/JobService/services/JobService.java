@@ -3,13 +3,17 @@ package com.hellFire.JobService.services;
 import com.hellFire.JobService.dtos.JobDto;
 import com.hellFire.JobService.dtos.requests.CreateJobRequest;
 import com.hellFire.JobService.dtos.requests.CreateJobSkillRequest;
+import com.hellFire.JobService.dtos.requests.UpdateJobRequest;
 import com.hellFire.JobService.dtos.responses.JobResponse;
 import com.hellFire.JobService.exceptions.ErrorCode;
+import com.hellFire.JobService.exceptions.AccessDeniedException;
 import com.hellFire.JobService.exceptions.JobNotFoundException;
 import com.hellFire.JobService.mappers.IJobMapper;
 import com.hellFire.JobService.mappers.ISkillMapper;
 import com.hellFire.JobService.models.Job;
 import com.hellFire.JobService.models.Skill;
+import com.hellFire.JobService.models.enums.JobStatus;
+import com.hellFire.JobService.models.enums.UserType;
 import com.hellFire.JobService.repositories.IJobRepository;
 import com.hellFire.JobService.security.UserContext;
 import com.hellFire.JobService.security.UserContextHolder;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,19 +43,43 @@ public class JobService {
     @Transactional
     public JobDto createJob(CreateJobRequest createJobRequest) {
         UserContext ctx = UserContextHolder.get();
+        if (ctx == null) {
+            throw new IllegalStateException("User context not set");
+        }
         Long userId = ctx.getUserId();
         Long tenantId = ctx.getTenantId();
         String username = ctx.getUsername();
         Job job = toEntity(createJobRequest);
+        if (job.getIndustries() == null) {
+            job.setIndustries(new HashSet<>());
+        }
+        if (job.getStatus() == null) {
+            job.setStatus(JobStatus.DRAFT);
+        }
         job.setCreatedByName(username);
         job.setCreatedBy(userId);
         job.setTenantId(tenantId);
+        job.setStatus(JobStatus.PUBLISHED);
         job = jobRepository.save(job);
         return toJobDto(job);
     }
 
     public List<Skill> createSkills(Job job, CreateJobSkillRequest request){
         return jobSkillService.createJobSkill(job, request);
+    }
+
+    @Transactional
+    public JobDto updateJob(Long id, UpdateJobRequest request) {
+        UserContext ctx = UserContextHolder.get();
+        if (ctx == null) {
+            throw new IllegalStateException("User context not set");
+        }
+        Job job = jobRepository.findById(id).orElseThrow(() -> new JobNotFoundException("Job not found for id " + id));
+        jobMapper.updateEntityFromRequest(request, job);
+        job.setLastUpdatedBy(ctx.getUserId());
+        job.setLastUpdatedByName(ctx.getUsername());
+        job = jobRepository.save(job);
+        return toJobDto(job);
     }
 
     @Transactional(readOnly = true)
@@ -62,29 +91,33 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public List<JobResponse> getAllJobs() {
+        UserContext ctx = UserContextHolder.get();
+        if (ctx == null || ctx.getUserType() != UserType.SYSTEM) {
+            throw new AccessDeniedException("Only System users can access get all jobs");
+        }
+        return toJobResponseList(jobRepository.findByDeleted(false));
+    }
 
-        List<Job> jobList = jobRepository.findByDeleted(false);
+    @Transactional(readOnly = true)
+    public List<JobResponse> getAllJobsByCreatedBy(Long createdBy) {
+        return toJobResponseList(jobRepository.findByCreatedByAndDeleted(createdBy, false));
+    }
 
+    @Transactional(readOnly = true)
+    public List<JobResponse> getAllJobsByTenantId(Long tenantId) {
+        return toJobResponseList(jobRepository.findByTenantIdAndDeleted(tenantId, false));
+    }
+
+    private List<JobResponse> toJobResponseList(List<Job> jobList) {
         List<Long> jobIds = jobList.stream()
                 .map(Job::getId)
                 .toList();
-
-        Map<Long, List<Skill>> jobSkillMap =
-                jobSkillService.getSkillsForJobIds(jobIds);
-
+        Map<Long, List<Skill>> jobSkillMap = jobSkillService.getSkillsForJobIds(jobIds);
         List<JobResponse> response = new ArrayList<>();
-
         for (Job job : jobList) {
             List<Skill> skills = jobSkillMap.getOrDefault(job.getId(), List.of());
-
-            response.add(
-                    new JobResponse(
-                            toJobDto(job),
-                            skillService.toDtoList(skills)
-                    )
-            );
+            response.add(new JobResponse(toJobDto(job), skillService.toDtoList(skills)));
         }
-
         return response;
     }
 

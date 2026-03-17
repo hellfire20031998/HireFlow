@@ -1,5 +1,6 @@
 package com.hellFire.JobService.security;
 
+import com.hellFire.JobService.models.enums.UserType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ public class RequestHeaderUserContextFilter extends OncePerRequestFilter {
         String rolesHeader = request.getHeader("X-Roles");
         String tenantIdHeader = request.getHeader("X-Tenant-Id");
         String userIdHeader = request.getHeader("X-User-Id");
+        String userTypeHeader = request.getHeader("X-User-Type");
 
         UserContext context = new UserContext();
 
@@ -38,6 +40,14 @@ public class RequestHeaderUserContextFilter extends OncePerRequestFilter {
 
         if (userIdHeader != null)
             context.setUserId(Long.parseLong(userIdHeader));
+
+        if (userTypeHeader != null) {
+            try {
+                context.setUserType(UserType.valueOf(userTypeHeader.trim()));
+            } catch (IllegalArgumentException ignored) {
+                // unknown enum value from gateway; leave userType null
+            }
+        }
 
         UserContextHolder.set(context);
 
