@@ -1,10 +1,13 @@
 package com.hellFire.JobService.dtos.requests;
 
+import com.hellFire.JobService.dtos.requests.CreateJobSkillRequest.JobSkillItem;
 import com.hellFire.JobService.models.enums.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -31,4 +34,7 @@ public class CreateJobRequest {
     private SalaryType salaryType;
     private Integer openings;
     private Instant deadlineTime;
+
+    // Optional: full job-skill mapping for this job
+    private List<@Valid JobSkillItem> skills;
 }

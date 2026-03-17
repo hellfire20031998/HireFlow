@@ -1,9 +1,12 @@
 package com.hellFire.JobService.dtos.requests;
 
+import com.hellFire.JobService.dtos.requests.CreateJobSkillRequest.JobSkillItem;
 import com.hellFire.JobService.models.enums.*;
+import jakarta.validation.Valid;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -27,4 +30,7 @@ public class UpdateJobRequest {
     private Integer openings;
     private Instant deadlineTime;
     private JobStatus status;
+
+    // Optional: full replacement list of skills for this job
+    private List<@Valid JobSkillItem> skills;
 }

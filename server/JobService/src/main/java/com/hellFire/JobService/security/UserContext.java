@@ -11,6 +11,7 @@ public class UserContext {
     private String username;
     private List<String> roles;
     private Long tenantId;
+    private String tenantName;
     /** User type from AuthService, set from X-User-Type header. */
     private UserType userType;
 }

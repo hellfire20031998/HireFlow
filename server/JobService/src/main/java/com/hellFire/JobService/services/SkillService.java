@@ -6,10 +6,12 @@ import com.hellFire.JobService.dtos.responses.ApiResponse;
 import com.hellFire.JobService.exceptions.ErrorCode;
 import com.hellFire.JobService.exceptions.SkillNotFoundException;
 import com.hellFire.JobService.mappers.ISkillMapper;
+import com.hellFire.JobService.models.JobSkill;
 import com.hellFire.JobService.models.Skill;
 import com.hellFire.JobService.repositories.ISkillRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -33,8 +35,28 @@ public class SkillService {
         return toDtoList(skillRepository.findAll());
     }
 
+    public List<SkillDto> getTop10Skills() {
+        return skillMapper.toDtoList(
+                skillRepository.findTop10ByOrderByCreatedAtDesc()
+        );
+    }
+
     public Skill getSkillById(Long skillId) {
         return skillRepository.findById(skillId).orElseThrow(()-> new SkillNotFoundException("Skill not found for id: " + skillId));
+    }
+
+    public List<Skill> getByIds(List<Long> skillIds) {
+        return skillRepository.findAllById(skillIds);
+    }
+
+    public List<SkillDto> searchSkill(String searchTerm) {
+        if (searchTerm == null || searchTerm.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        return skillMapper.toDtoList(
+                skillRepository.findTop10ByNameContainingIgnoreCase(searchTerm)
+        );
     }
 
     public SkillDto toDto(Skill skill) {
@@ -43,6 +65,10 @@ public class SkillService {
 
     public List<SkillDto> toDtoList(List<Skill> skills) {
         return skillMapper.toDtoList(skills);
+    }
+
+    public List<SkillDto> toDtoListFromJobSkills(List<JobSkill> jobSkills) {
+        return skillMapper.fromJobSkills(jobSkills);
     }
 
     public Skill toEntity(CreateSkillRequest request) {

@@ -35,6 +35,7 @@ public class JwtService {
         claims.put("user_Id", user.getId());
         if (user.getTenant() != null) {
             claims.put("tenant_Id", user.getTenant().getId());
+            claims.put("tenant_Name", user.getTenant().getTenantName());
         }
         if (user.getUserType() != null) {
             claims.put("user_Type", user.getUserType().name());

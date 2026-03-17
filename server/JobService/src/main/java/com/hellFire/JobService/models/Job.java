@@ -74,6 +74,7 @@ public class Job extends BaseEntity {
     private String createdByName;
 
     private Long tenantId;
+    private String tenantName;
 
     private Long lastUpdatedBy;
     private String lastUpdatedByName;

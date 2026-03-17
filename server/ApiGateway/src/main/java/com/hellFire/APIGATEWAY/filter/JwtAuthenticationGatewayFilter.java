@@ -99,6 +99,10 @@ public class JwtAuthenticationGatewayFilter implements org.springframework.cloud
         if (tenantId != null) {
             builder.header("X-Tenant-Id", String.valueOf(tenantId));
         }
+        Object tenantName = claims.get("tenant_Name");
+        if (tenantId != null) {
+            builder.header("X-Tenant-Name", String.valueOf(tenantName));
+        }
         Object rolesObj = claims.get("roles");
         if (rolesObj instanceof List<?> roles) {
             String rolesHeader = roles.stream()

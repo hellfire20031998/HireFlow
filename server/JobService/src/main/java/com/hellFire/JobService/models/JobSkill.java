@@ -1,9 +1,7 @@
 package com.hellFire.JobService.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import com.hellFire.JobService.models.enums.SkillPriority;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -26,6 +24,7 @@ public class JobSkill extends BaseEntity {
     private Integer minExperienceYears;
     private Integer maxExperienceYears;
 
-    private Integer priority;
+    @Enumerated(EnumType.STRING)
+    private SkillPriority priority;
 }
 

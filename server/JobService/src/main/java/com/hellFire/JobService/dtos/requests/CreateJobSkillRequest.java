@@ -1,6 +1,7 @@
 package com.hellFire.JobService.dtos.requests;
 
 
+import com.hellFire.JobService.models.enums.SkillPriority;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -34,7 +35,6 @@ public class CreateJobSkillRequest {
         private Integer maxExperienceYears;
 
         @NotNull(message = "Priority is required")
-        @Min(value = 1, message = "Priority must be at least 1")
-        private Integer priority;
+        private SkillPriority priority;
     }
 }

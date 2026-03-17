@@ -36,4 +36,13 @@ public class SkillController {
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(skillDtos));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<SkillDto>>> searchSkills(@RequestParam String searchTerm){
+        List<SkillDto> skillDtos = skillService.searchSkill(searchTerm);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(skillDtos));
+
+    }
 }

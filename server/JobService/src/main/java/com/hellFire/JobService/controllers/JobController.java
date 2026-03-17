@@ -44,8 +44,13 @@ public class JobController {
     }
 
     @GetMapping("/get-all-jobs")
-    public ResponseEntity<ApiResponse<List<JobResponse>>> getAllJobs() {
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(jobService.getAllJobs()));
+    public ResponseEntity<ApiResponse<List<JobResponse>>> getAllJobs(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(jobService.getAllJobs(page, size)));
     }
 
     @GetMapping("/get-all-jobs/by-created-by/{createdBy}")
@@ -70,6 +75,7 @@ public class JobController {
                 .jobStatuses(toNames(JobStatus.values()))
                 .salaryCurrencies(toNames(SalaryCurrency.values()))
                 .salaryTypes(toNames(SalaryType.values()))
+                .skillPriorities(toNames(SkillPriority.values()))
                 .build();
         return ResponseEntity.ok(ApiResponse.success(enums));
     }

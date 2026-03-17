@@ -21,4 +21,5 @@ public class EnumsResponse {
     private List<String> jobStatuses;
     private List<String> salaryCurrencies;
     private List<String> salaryTypes;
+    private List<String> skillPriorities;
 }

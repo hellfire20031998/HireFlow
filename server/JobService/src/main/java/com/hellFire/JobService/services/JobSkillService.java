@@ -1,6 +1,7 @@
 package com.hellFire.JobService.services;
 
 import com.hellFire.JobService.dtos.requests.CreateJobSkillRequest;
+import com.hellFire.JobService.dtos.requests.CreateJobSkillRequest.JobSkillItem;
 import com.hellFire.JobService.models.Job;
 import com.hellFire.JobService.models.JobSkill;
 import com.hellFire.JobService.models.Skill;
@@ -25,9 +26,9 @@ public class JobSkillService {
         this.skillService = skillService;
     }
 
-    public List<Skill> getAllSkillByJobId(Long jobId) {
+    public List<JobSkill> getAllSkillByJobId(Long jobId) {
         List<JobSkill> jobSkillList = jobSkillRepository.findByJob_IdAndDeleted(jobId, false);
-        return jobSkillList.stream().map(JobSkill::getSkill).collect(Collectors.toList());
+        return jobSkillList;
     }
 
     @Transactional
@@ -54,14 +55,37 @@ public class JobSkillService {
         return jobSkillList.stream().map(JobSkill::getSkill).toList();
     }
 
-    public Map<Long, List<Skill>> getSkillsForJobIds(List<Long> jobIds) {
+    /**
+     * Replace all skills for a job with the provided items.
+     * - If items is null: do nothing (leave existing mappings as-is).
+     * - If items is empty: remove all existing skills for the job.
+     */
+    @Transactional
+    public void replaceJobSkills(Job job, List<JobSkillItem> items) {
+        if (items == null) {
+            return;
+        }
+        // remove all existing mappings
+        jobSkillRepository.deleteByJob_Id(job.getId());
+
+        if (items.isEmpty()) {
+            return; // user explicitly wants no skills
+        }
+
+        CreateJobSkillRequest request = new CreateJobSkillRequest();
+        request.setJobId(job.getId());
+        request.setSkills(items);
+        createJobSkill(job, request);
+    }
+
+    public Map<Long, List<JobSkill>> getSkillsForJobIds(List<Long> jobIds) {
         List<JobSkill> jobSkills = jobSkillRepository.findByJobIdIn(jobIds);
 
-        Map<Long, List<Skill>> map = new HashMap<>();
+        Map<Long, List<JobSkill>> map = new HashMap<>();
 
         for (JobSkill js : jobSkills) {
             map.computeIfAbsent(js.getJob().getId(), k -> new ArrayList<>())
-                    .add(js.getSkill());
+                    .add(js);
         }
 
         return map;

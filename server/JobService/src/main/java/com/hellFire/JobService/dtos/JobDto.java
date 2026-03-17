@@ -32,6 +32,7 @@ public class JobDto extends BaseEntityDto {
     private Long createdBy;
     private String createdByName;
     private Long tenantId;
+    private String tenantName;
     private Long lastUpdatedBy;
     private String lastUpdatedByName;
 }

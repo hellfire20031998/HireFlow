@@ -26,6 +26,7 @@ public class RequestHeaderUserContextFilter extends OncePerRequestFilter {
         String tenantIdHeader = request.getHeader("X-Tenant-Id");
         String userIdHeader = request.getHeader("X-User-Id");
         String userTypeHeader = request.getHeader("X-User-Type");
+        String tenantNameHeader = request.getHeader("X-tenant-Name");
 
         UserContext context = new UserContext();
 
@@ -37,6 +38,9 @@ public class RequestHeaderUserContextFilter extends OncePerRequestFilter {
 
         if (tenantIdHeader != null)
             context.setTenantId(Long.parseLong(tenantIdHeader));
+
+        if (tenantNameHeader != null)
+            context.setTenantName(tenantNameHeader);
 
         if (userIdHeader != null)
             context.setUserId(Long.parseLong(userIdHeader));

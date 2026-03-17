@@ -11,4 +11,6 @@ public interface IJobSkillRepository extends JpaRepository<JobSkill, Integer> {
     List<JobSkill> findByJob_IdAndDeleted(Long jobId, boolean deleted);
 
     List<JobSkill> findByJobIdIn(List<Long> jobIds);
+
+    void deleteByJob_Id(Long jobId);
 }
