@@ -2,7 +2,6 @@ package com.hellFire.AuthService.services;
 
 import com.hellFire.AuthService.dto.responses.ApiResponse;
 import com.hellFire.AuthService.dto.responses.EmailVerificationRequest;
-import com.hellFire.AuthService.model.EmailVerificationToken;
 import com.hellFire.AuthService.model.User;
 import com.hellFire.AuthService.utils.SecurityUtil;
 import com.hellFire.AuthService.utils.UrlUtils;
@@ -30,10 +29,10 @@ public class EmailVerificationService {
 
     public String createEmailVerificationRequest() {
         User user = SecurityUtil.getCurrentUser();
-        EmailVerificationToken token = emailVerificationTokenService.getToken(user);
+        String token = emailVerificationTokenService.getToken(user);
 
         EmailVerificationRequest request =
-                new EmailVerificationRequest(user.getEmail(), token.getToken());
+                new EmailVerificationRequest(user.getEmail(), token);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -43,8 +42,12 @@ public class EmailVerificationService {
 
         String url = UrlUtils.EmailVerifyUrl;
 
-        ResponseEntity<ApiResponse> response =
-                restTemplate.postForEntity(url, entity, ApiResponse.class);
+        ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<ApiResponse<String>>() {}
+        );
 
         if (response.getStatusCode().is2xxSuccessful()) {
             sendWelcomeMail(user.getEmail(), user.getUsername());

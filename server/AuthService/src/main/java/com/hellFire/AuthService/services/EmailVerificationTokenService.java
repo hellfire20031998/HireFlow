@@ -2,113 +2,75 @@ package com.hellFire.AuthService.services;
 
 import com.hellFire.AuthService.exceptions.BusinessException;
 import com.hellFire.AuthService.exceptions.ErrorCode;
-import com.hellFire.AuthService.model.EmailVerificationToken;
 import com.hellFire.AuthService.model.User;
-import com.hellFire.AuthService.respositories.IEmailVerificationTokenRepository;
 import com.hellFire.AuthService.utils.Utils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class EmailVerificationTokenService {
 
-    private final IEmailVerificationTokenRepository emailVerificationTokenRepository;
+    private static final long OTP_TTL_SECONDS = 300;
 
-    public EmailVerificationTokenService(IEmailVerificationTokenRepository emailVerificationTokenRepository) {
-        this.emailVerificationTokenRepository = emailVerificationTokenRepository;
-    }
+    // In-memory OTP store that mimics Redis-style key TTL behavior.
+    private final ConcurrentMap<Long, OtpEntry> otpStore = new ConcurrentHashMap<>();
 
-    @Transactional
-    public EmailVerificationToken getToken(User user) {
+    public String getToken(User user) {
+        long userId = user.getId();
+        Instant now = Instant.now();
 
-        EmailVerificationToken token =
-                emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(
-                        user.getId(), false, false
-                );
-
-        if (token == null) {
-            return createToken(user);
-        }
-        if (token.getExpiresAt().isBefore(Instant.now())) {
-            emailVerificationTokenRepository.delete(token);
-            return createToken(user);
-        }
-        return token;
-    }
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public EmailVerificationToken createToken(User user) {
-
-        EmailVerificationToken token =
-                emailVerificationTokenRepository.findByUser_IdAndUsedAndDeleted(
-                        user.getId(), false, false
-                );
-
-        if (token == null) {
-            return generateNewToken(user);
+        OtpEntry current = otpStore.get(userId);
+        if (current != null && current.expiresAt().isAfter(now)) {
+            return current.token();
         }
 
-        if (token.getExpiresAt().isBefore(Instant.now())) {
-            emailVerificationTokenRepository.delete(token);
-            return generateNewToken(user);
-        }
-
-        return token;
+        OtpEntry next = generateNewToken();
+        otpStore.put(userId, next);
+        return next.token();
     }
 
 
     public void verifyToken(User user, String token) {
+        long userId = user.getId();
 
-        EmailVerificationToken emailVerificationToken =
-                emailVerificationTokenRepository
-                        .findByUser_IdAndUsedAndDeleted(user.getId(), false, false);
+        OtpEntry otpEntry = otpStore.get(userId);
 
-        if (emailVerificationToken == null) {
+        if (otpEntry == null) {
             throw new BusinessException(
                     ErrorCode.TOKEN_NOT_FOUND,
                     "No active email verification token found"
             );
         }
 
-//        if (!isValidTokenFormat(token)) {
-//            throw new BusinessException(
-//                    ErrorCode.TOKEN_INVALID,
-//                    "Invalid token format"
-//            );
-//        }
-
-        if (!emailVerificationToken.getToken().equals(token)) {
+        if (!otpEntry.token().equals(token)) {
             throw new BusinessException(
                     ErrorCode.TOKEN_INVALID,
                     "Token does not match"
             );
         }
 
-        if (emailVerificationToken.getExpiresAt().isBefore(Instant.now())) {
+        if (otpEntry.expiresAt().isBefore(Instant.now())) {
+            otpStore.remove(userId, otpEntry);
             throw new BusinessException(
                     ErrorCode.TOKEN_EXPIRED,
                     "Token has expired"
             );
         }
 
-        emailVerificationToken.setUsed(true);
-        emailVerificationTokenRepository.save(emailVerificationToken);
+        // One-time use token: remove it after successful verification.
+        otpStore.remove(userId, otpEntry);
     }
 
-    private EmailVerificationToken generateNewToken(User user) {
-
-        emailVerificationTokenRepository.deleteAllByUser_Id(user.getId());
-
-        EmailVerificationToken token = new EmailVerificationToken();
-        token.setUser(user);
-        token.setToken(Utils.generateOtp());
-        token.setExpiresAt(Instant.now().plusSeconds(600));
-
-        return emailVerificationTokenRepository.save(token);
+    private OtpEntry generateNewToken() {
+        return new OtpEntry(
+                Utils.generateOtp(),
+                Instant.now().plusSeconds(OTP_TTL_SECONDS)
+        );
     }
 
+    private record OtpEntry(String token, Instant expiresAt) {}
 
 }
